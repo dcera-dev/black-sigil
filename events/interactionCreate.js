@@ -15,20 +15,54 @@ module.exports = {
         //Start Command
 
         if (interaction.isChatInputCommand() && interaction.commandName === 'duel') {
-            const choiceA = interaction.options.getString('choicea');
-            const choiceB = interaction.options.getString('choiceb');
+            const subcommand = interaction.options.getSubcommand();
 
-            const duel = duelManager.createDuel(channelId, choiceA, choiceB);
+            if (subcommand === 'start') {
+                const choiceA = interaction.options.getString('choicea');
+                const choiceB = interaction.options.getString('choiceb');
 
-            message = await interaction.reply({
-                embeds: [renderFullDuelEmbed(duelManager.getDuel(channelId))],
-                components: getDuelComponents(duel, classes),
-                fetchReply: true
-            });
+                const duel = duelManager.createDuel(channelId, choiceA, choiceB);
 
-            duel.messageId = message.id;
+                //Timeout
+                duel.timeout = setTimeout(async () => {
+                    duelManager.endDuel(channelId);
+                    try {
+                        await channel.send(`The duel timed out, not enough challengers appeared.`);
+                    }
+                    catch (err) {
+                        console.error("Timeout messaged failed: ", err);
+                    }
+                }, 5 * 60 * 1000);
 
-            return;
+                message = await interaction.reply({
+                    embeds: [renderFullDuelEmbed(duelManager.getDuel(channelId))],
+                    components: getDuelComponents(duel, classes),
+                    fetchReply: true
+                });
+
+                duel.messageId = message.id;
+
+                return;
+            }
+
+            if (subcommand === 'cancel') {
+                const issuerId = interaction.user.id;
+                const isPlayer = duelManager.isPlayer(channel, issuerId);
+                const isMod = member.permissions?.has('ManageMessages');
+
+                if (!isPlayer && !isMod) {
+                    return interaction.reply({ content: "insufficient permissions", ephemeral: true });
+                }
+
+                if (duel.timeout) clearTimeout(duel.timeout);
+                const success = duelManager.endDuel(channelId);
+
+                if (success) {
+                    await channel.send(`The duel has been cancelled.`);
+                    return interaction.reply({ content: "Duel cancelled.", emphermal: true });
+                }
+                else return interaction.reply({ content: "No duel to cancel.", emphermal: true });
+            }
         }
 
         //Button Interactions
@@ -52,6 +86,10 @@ module.exports = {
             const allJoined = duel.players.length === 2;
 
             if (allJoined) {
+                if (duel.timeout) {
+                    clearTimeout(duel.timeout);
+                    duel.timeout = null;
+                }
                 duel.phase = 'class';
             }
 
