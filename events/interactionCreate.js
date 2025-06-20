@@ -57,7 +57,7 @@ module.exports = {
                 const isPlayer = duelManager.isPlayer(channel, issuerId);
 
                 if (!isPlayer) {
-                    await interaction.reply({ content: "Can't cancel a duel you're not part of.", ephemeral: true  });
+                    return interaction.reply({ content: "Can't cancel a duel you're not part of.", ephemeral: true  });
                 }
 
                 if (duel.timeout) clearTimeout(duel.timeout);
