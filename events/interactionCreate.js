@@ -55,10 +55,9 @@ module.exports = {
             if (subcommand === 'cancel') {
                 const issuerId = interaction.user.id;
                 const isPlayer = duelManager.isPlayer(channel, issuerId);
-                const isMod = member.permissions?.has('ManageMessages');
 
-                if (!isPlayer && !isMod) {
-                    return interaction.reply({ content: "insufficient permissions", ephemeral: true });
+                if (!isPlayer) {
+                    await interaction.reply({ content: "Can't cancel a duel you're not part of.", ephemeral: true  });
                 }
 
                 if (duel.timeout) clearTimeout(duel.timeout);
