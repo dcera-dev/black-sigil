@@ -53,7 +53,7 @@ module.exports = {
             }
 
             if (subcommand === 'cancel') {
-                const isPlayer = duelManager.isPlayer(channel, userId);
+                const isPlayer = duelManager.isPlayer(channelId, userId);
 
                 if (!isPlayer) {
                     return interaction.reply({ content: "Can't cancel a duel you're not part of.", ephemeral: true  });
