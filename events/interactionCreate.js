@@ -18,6 +18,13 @@ module.exports = {
             const subcommand = interaction.options.getSubcommand();
 
             if (subcommand === 'start') {
+                if (duelManager.getDuel(channelId)) {
+                    return interaction.reply({
+                        content: "A duel is already in progress on this channel.",
+                        ephemeral: true
+                    });
+                }
+
                 const choiceA = interaction.options.getString('choicea');
                 const choiceB = interaction.options.getString('choiceb');
 
