@@ -53,6 +53,11 @@ module.exports = {
             }
 
             if (subcommand === 'cancel') {
+                const duel = duelManager.getDuel(channelId);
+                if (!duel) {
+                    return interaction.reply({ content: "No duel in this channel.", ephemeral: true})
+                }
+
                 const isPlayer = duelManager.isPlayer(channelId, userId);
 
                 if (!isPlayer) {
@@ -64,9 +69,9 @@ module.exports = {
 
                 if (success) {
                     await channel.send(`The duel has been cancelled.`);
-                    return interaction.reply({ content: "Duel cancelled.", emphermal: true });
+                    return interaction.reply({ content: "Duel cancelled.", ephemeral: true });
                 }
-                else return interaction.reply({ content: "No duel to cancel.", emphermal: true });
+                else return interaction.reply({ content: "No duel to cancel.", ephemeral: true });
             }
         }
 
